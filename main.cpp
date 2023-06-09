@@ -18,15 +18,30 @@ int main()
     // Set the clock to port A
     RCC->AHB2ENR|=0x1;
     // Set pins 2 and 3 to output mode
-    GPIOA->MODER &=~(0xA0);
+    GPIOA->MODER &= ~(0xA0);
     GPIOA->MODER |= (0x50);
-    // Power pins 2 and 3 on 
-    GPIOA->ODR |= (0xC);
 
     while (true) {
         if (uint32_t num = serial_port.read(buf, sizeof(buf))) { // if there's a char written
-            printf("%c\n", buf[0]);//used as test case to make sure there is data written
+            char input_char = buf[0];
+            printf("%c\n", input_char);//used as test case to make sure there is data written
+            if(input_char == 'w'){
+                GPIOA->ODR |= (0xC); //1100
+            }
+            else if(input_char == 'd'){ //turning right so left engine is moving
+                GPIOA->ODR |= (0x8);
+                GPIOA->ODR &= ~(0x4);
+            }
+            else if (input_char == 'a'){ //turning left so right engine is moving
+                GPIOA->ODR |= (0x4);
+                GPIOA->ODR &= ~(0x8);
+            }
+            else {
+                GPIOA->ODR &= ~(0xC); // completely stop if other key input
+            }
+         
         }
+        
     }
 }
 
